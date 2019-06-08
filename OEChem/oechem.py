@@ -42,7 +42,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description="OEchem data downloader")
     parser.add_argument("-f", "--input-file", dest='inputFile', type=argparse.FileType('r'), metavar='FILE',
-                        help="input file with space or newline separated IDs")
+                        help="input file with space or newline separated IDs. For stdin use -")
     parser.add_argument("-i", "--ids", dest='ids', type=check_ids, metavar='LIST',
                         help="List of IDs, --ids '399 400 5476276'")
     parser.add_argument("-o", "--output-file", dest='outFile', type=argparse.FileType('w'), 
