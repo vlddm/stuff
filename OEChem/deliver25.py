@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-import sqlite3, sys, os
+import sqlite3, sys, os, time
 from distutils.dir_util import mkpath
 
 def deliverFiles(ids, dbFile, inputDir, outputDir):
@@ -70,7 +70,9 @@ if __name__ == '__main__':
     if args.ids:
         ids.extend(args.ids)
     if ids:
+        startTime = time.time()
         print("Delivering {} files to {}".format(len(ids), args.outputDir), file=sys.stderr)
         deliverFiles(ids = ids, dbFile = args.dbFile, inputDir =args.inputDir, outputDir = args.outputDir)
+        print( "\nExecution completed. Work time {:.2f} sec".format(time.time()-startTime) )
     else:
         parser.error ('Either --input-file or --ids is required.')
