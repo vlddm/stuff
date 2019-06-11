@@ -35,14 +35,14 @@ def sec2time(sec, n_msec=0):
     return ('%d days, ' + pattern) % (d, h, m, s)
 
 
-def indexFile(dir, filename, fileNumber, cursor):
+def indexFile(inputDir, filename, fileNumber, cursor):
     bytesWriten = 0
     indexData = []
     position = 0
     cidString = "<PUBCHEM_CID_ASSOCIATIONS>\n"
     cursor.execute('INSERT OR REPLACE INTO oechem_filenames(id,filename) VALUES (?,?)', (fileNumber,filename))
     filename_id = cursor.lastrowid
-    with open(dir + '/' + filename, "r") as f:
+    with open(inputDir + '/' + filename, "r") as f:
         data = f.read()
         for j in data.split('\n\n$$$$\n'):
             try:
@@ -72,10 +72,9 @@ def indexFile(dir, filename, fileNumber, cursor):
         cursor.executemany('INSERT OR REPLACE INTO oechem_data(sid,pos,size,cid,filename_id) VALUES (?,?,?,?,?)', indexData)
     return filesize 
 
-def main(startFrom, dbFile):
+def main(startFrom, dbFile, inputDir):
     work_time = time.time()
-    dirPath = os.getcwd()
-    filesList = os.listdir(dirPath)
+    filesList = os.listdir(inputDir)
     filesList = [x for x in filesList if x[-4:] == '.sdf']
     filesList.sort()
     if startFrom != None:
@@ -95,7 +94,7 @@ def main(startFrom, dbFile):
         for currentFile in filesList:
             currentFileStartTime = time.time()
             fileNumber += 1
-            bytesReaden = indexFile(dirPath, currentFile, fileNumber, cursor)
+            bytesReaden = indexFile(inputDir, currentFile, fileNumber, cursor)
             secSinceStart = time.time() - work_time
             secLeft = (size-fileNumber)*secSinceStart/fileNumber
             print ("\r{} [{}/{}] {:.2f}MB/sec | time {} | ETA {}".format(currentFile, fileNumber, len(filesList), (bytesReaden/1048576)/(time.time() - currentFileStartTime), sec2time(secSinceStart), sec2time(secLeft)), end="")
@@ -132,13 +131,13 @@ def check_ids(ids):
 
 if __name__ == '__main__':
     import argparse
-    readFromPath = os.getcwd()
+    currentDir = os.getcwd()
     parser = argparse.ArgumentParser(description="OEchem data downloader", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--db", dest='dbFile',  
                         metavar='DBFILE', required=True,
                         help="SQLite database file to store index. Must not exist")
-    parser.add_argument("-r", "--readfromdir", dest='readFromPath',  
-                        metavar='DIR', default = readFromPath,
+    parser.add_argument("-r", "--readfromdir", dest='inputDir',  
+                        metavar='DIR', default = currentDir,
                         help='Directory to search input SDF files')     
 
     args = parser.parse_args()
@@ -146,9 +145,10 @@ if __name__ == '__main__':
     if os.path.isfile(args.dbFile):
         print("file {} exists, exiting".format(args.dbFile))
         exit(1)
-    
-    main(startFrom=None, dbFile = args.dbFile)
-    print("Index saved to {}.".format(args.dbFile))
+    inputDir = os.path.abspath(args.inputDir)
+    dbFile = os.path.abspath(args.dbFile)
+    main(startFrom=None, dbFile = dbFile, inputDir = inputDir)
+    print("Index saved to {}.".format(dbFile))
     print("To get CSV from sqlite database you can use this command:")
-    print(" sqlite3 -header -csv {} 'select sid,cid from oechem_data' > output.csv".format(args.dbFile))
+    print(" sqlite3 -header -csv {} 'select sid,cid from oechem_data' > output.csv".format(dbFile))
     print("")
