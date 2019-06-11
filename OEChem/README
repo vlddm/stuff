@@ -1,0 +1,17 @@
+This is OEChem data manipulation scripts
+
+First you need to build index DB with position, size and filename of each molecule.
+Needs about 2 hours to finish (no need to run, already builded)
+
+~/scripts25/indexer.py --readfromdir ~/ --db ~/scripts25/new.sqlite
+
+
+To extract molecules to tar.gz file after building index:
+
+~/scripts25/extractor25.py  --readfromdir ~/ --db ~/scripts25/index.sqlite --input-file in.txt --output-file results.tgz
+
+Index data can be extracted to csv file for instance:
+sqlite3 -header -csv {} 'select sid,cid from oechem_data' > output.csv
+
+This csv can be imported to mysql  (use substance1.sql as example. `mysql yourdbname < substance1.sql`)
+
