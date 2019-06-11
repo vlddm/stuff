@@ -42,7 +42,7 @@ def check_ids(ids):
 def check_dir(myDir):
     if not os.path.isdir(myDir):
         mkpath(myDir)
-        print('Creating {}'.format(myDir))
+        print('Creating {}'.format(myDir), file=sys.stderr)
     return myDir
 
 if __name__ == '__main__':
@@ -73,8 +73,8 @@ if __name__ == '__main__':
         ids.extend(args.ids)
     if ids:
         startTime = time.time()
-        print("Extracted {} files to {}".format(len(ids), args.outFile.name), file=sys.stderr)
+        print("Fetched {} files to {}".format(len(ids), args.outFile.name), file=sys.stderr)
         deliverFiles(ids = ids, dbFile = args.dbFile, inputDir =args.inputDir, outFile = args.outFile)
-        print( "\nExecution completed. Work time {:.2f} sec".format(time.time()-startTime) )
+        print( "\nExecution completed. Work time {:.2f} sec".format(time.time()-startTime), file=sys.stderr )
     else:
         parser.error ('Either --input-file or --ids is required.')
