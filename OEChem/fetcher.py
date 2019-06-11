@@ -8,6 +8,7 @@ from io import BytesIO
 def deliverFiles(ids, dbFile, inputDir, outFile):
     i = 0
     missedFiles = 0
+    mtime = time.time()
     with sqlite3.connect(dbFile) as conn:
         cursor = conn.cursor()
         with tarfile.open(fileobj=outFile, mode="w:gz") as tf:
@@ -22,6 +23,7 @@ def deliverFiles(ids, dbFile, inputDir, outFile):
                         data = f.read(size)
                         tarinfo = tarfile.TarInfo(name=str(sid))
                         tarinfo.size = len(data)
+                        tarinfo.mtime = mtime
                         tf.addfile(tarinfo, BytesIO(data))
                 else:
                     missedFiles+=1
